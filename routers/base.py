@@ -39,11 +39,6 @@ TestRetry = '/testRetry',
 from fastapi import status
 
 # status.HTTP_200_OK
-
-real_user_login_info = {
-    'vben': '123456'
-}
-
 tokens = {
     'vben': 'fakeToken1'
 }
@@ -52,12 +47,12 @@ user_infos = {
     'vben': {
         'userId': '1',
         'username': 'vben',
-        'realName': 'Vben Admin',
+        'realName': 'Gali',
         'avatar': 'https://q1.qlogo.cn/g?b=qq&nk=190848757&s=640',
         'desc': 'manager',
         'password': '123456',
         'token': 'fakeToken1',
-        'homePath': '/dashboard/analysis',
+        'homePath': '/dashboard/workbench',
         'roles': [
             {
                 'roleName': 'Super Admin',
@@ -78,7 +73,7 @@ async def user_home(body: dict = Body(embed=False)):
     password = body['password']
 
     # validate username&password
-    real_password = real_user_login_info.get(username)
+    real_password = user_infos[username]['password']
 
     token = ''
     if password == real_password:
