@@ -2,11 +2,12 @@ import os
 import uvicorn
 import socket
 from fastapi import FastAPI
-from routers import user
+from routers import base, user
 from fastapi.middleware.cors import CORSMiddleware
 
 """
 uvicorn main:app --reload
+uvicorn main:app --reload --host xxx --port xxx
 
 http://127.0.0.1:8000/docs
 https://fastapi.tiangolo.com/zh/
@@ -17,6 +18,8 @@ app = FastAPI()
 
 # BASE_URL = 'http://127.0.0.1:8000/dev-api'
 router_prefix = '/dev-api'
+# router_prefix_base = '/basic-api'
+app.include_router(base.router)
 app.include_router(user.router, prefix=router_prefix)
 
 
@@ -33,13 +36,14 @@ def get_variable_name(variable):
 
 origins = [
     "http://localhost",
-    "http://localhost:8000",
+    "http://localhost:3100",
 ]
 
 # CORS 跨域
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    # allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
