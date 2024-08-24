@@ -64,7 +64,7 @@ user_infos = {
 
 
 @router.post("/login")
-async def user_home(body: dict = Body(embed=False)):
+async def login(body: dict = Body(embed=False)):
     """
     POST http://127.0.0.1:8000/basic-api/login
     :return:
@@ -108,13 +108,14 @@ async def user_home(body: dict = Body(embed=False)):
 
 
 @router.get("/getUserInfo")
-def get_user_info(request: Request):
+async def get_user_info(request: Request):
     # getRequestToken 从获取前端Request请求中 获取headers中的Token
     auth_token = request.headers.get("Authorization")
     logging.info(f"[getUserInfo][Token]:{auth_token}")
 
     # 校验Token
-    if auth_token is None:
+    # if auth_token is None:
+    if not auth_token:
         # 非法Token
         logging.info(f"[非法Token]:{auth_token}")
         return {
@@ -124,11 +125,14 @@ def get_user_info(request: Request):
             'type': 'error'
         }
 
+    # check_user 校验用户
+    is_user = False
     result = None
     for user, token in tokens.items():
         if token == auth_token:
             # 获取Token对应的user_info
             user_info = user_infos[user]
+            is_user = True
             result = {
                 'userId': user_info['userId'],
                 'username': user_info['username'],
@@ -140,7 +144,7 @@ def get_user_info(request: Request):
             }
             break
 
-    if result is None:
+    if not is_user:
         return {
             'code': -1,
             'result': None,
@@ -154,5 +158,50 @@ def get_user_info(request: Request):
         'code': status.HTTP_200_OK,
         'result': result,
         'message': 'ok',
+        'type': 'success'
+    }
+
+
+@router.get("/logout")
+async def logout(request: Request):
+    # getRequestToken 从获取前端Request请求中 获取headers中的Token
+    auth_token = request.headers.get("Authorization")
+    logging.info(f"[logout][Token]:{auth_token}")
+
+    # 校验Token
+    if not auth_token:
+        # 非法Token
+        logging.info(f"[非法Token]:{auth_token}")
+        return {
+            'code': -1,
+            'result': None,
+            'message': 'Invalid token',
+            'type': 'error'
+        }
+
+    is_user = False
+    for user, token in tokens.items():
+        if token == auth_token:
+            # 获取Token对应的user_info
+            user_info = user_infos[user]
+            is_user = True
+            break
+
+    if not is_user:
+        return {
+            'code': -1,
+            'result': None,
+            'message': 'Invalid token!',
+            'type': 'error'
+        }
+
+    # 正常情况,用户验证成功,可以登出
+    # 删除过期Token
+    logging.info(f"[logout]:{auth_token}-Token验证成功")
+    # delete Token ...
+    return {
+        'code': status.HTTP_200_OK,
+        'result': None,
+        'message': 'Token has been destroyed',
         'type': 'success'
     }
